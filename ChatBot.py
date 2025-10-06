@@ -48,9 +48,28 @@ class State(TypedDict):
 # Define a new graph
 workflow = StateGraph(state_schema=State)
 
+# Limiting the context window
+from langchain_core.messages import trim_messages
+trimmer = trim_messages(
+    max_tokens=65,
+    strategy="last",
+    token_counter=model,
+    include_system=True,
+    allow_partial=False,
+    start_on="human",
+)
+
 # Define the function that calls the model
 def call_model(state: State):
-    prompt = prompt_template.invoke(state)
+    print(f"Messages before trimming: {len(state['messages'])}")
+    trimmed_messages = trimmer.invoke(state["messages"])
+    print(f"Messages after trimming: {len(trimmed_messages)}")
+    print("Remaining messages:")
+    for msg in trimmed_messages:
+        print(f"  {type(msg).__name__}: {msg.content}")
+    prompt = prompt_template.invoke(
+        {"messages": trimmed_messages, "language": state["language"]}
+    )
     response = model.invoke(prompt)
     return {"messages": [response]}
 
@@ -67,7 +86,7 @@ app = workflow.compile(checkpointer=memory)
 config = {"configurable": {"thread_id": "abc124"}}
 
 query = "Hi! I'm Abhirup."
-language = "Sanskrit"
+language = "English"
 input_messages = [HumanMessage(query)]
 output = app.invoke(
     {"messages": input_messages, "language": language},
