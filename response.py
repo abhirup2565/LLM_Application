@@ -12,22 +12,22 @@ if not os.environ.get("GOOGLE_API_KEY"):
 
 model = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
 
-#without template
-# messages = [
-#     SystemMessage(content="Translate the following from English into Italian"),
-#     HumanMessage(content="hi!"),
-# ]
-# model.invoke(messages)
-# for token in model.stream(messages):
-#     print(token.content, end="|")
+# without template
+messages = [
+    SystemMessage(content="Translate the following from English into Italian"),
+    HumanMessage(content="hi!"),
+]
+model.invoke(messages)
+for token in model.stream(messages):
+    print(token.content, end="|")
 
 #with template
-system_template = "Translate the following from English into {language}"
-prompt_template = ChatPromptTemplate.from_messages(
-    [("system", system_template), ("user", "{text}")]
-)
+# system_template = "Translate the following from English into {language}"
+# prompt_template = ChatPromptTemplate.from_messages(
+#     [("system", system_template), ("user", "{text}")]
+# )
 
-prompt = prompt_template.invoke({"language": "Italian", "text": "hi!"})
-response = model.invoke(prompt)
-print(response)
-print(response.content)
+# prompt = prompt_template.invoke({"language": "Italian", "text": "hi!"})
+# response = model.invoke(prompt)
+# print(response)
+# print(response.content)
